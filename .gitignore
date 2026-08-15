@@ -1,0 +1,34 @@
+# --- Node ---
+node_modules/
+*.log
+npm-debug.log*
+
+# --- TypeSpec ---
+tsp-output/
+# contracts/dist/openapi.yaml КОММИТИТСЯ — это артефакт для потребителей.
+# Свежесть проверяет CI (npm run contract:check).
+
+# --- Frontend ---
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/*.tsbuildinfo
+# frontend/src/api/schema.d.ts КОММИТИТСЯ — генерируется из контракта,
+# чтобы сборка фронта не требовала TypeSpec.
+
+# --- .NET ---
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+backend/**/appsettings.*.local.json
+TestResults/
+*.trx
+*.coverage
+*.coverisage.xml
+
+# --- IDE / OS ---
+.idea/
+.DS_Store
+Thumbs.db

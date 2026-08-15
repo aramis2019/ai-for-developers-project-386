@@ -1,0 +1,68 @@
+name: backend
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", "contracts/dist/**", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", "contracts/dist/**", ".github/workflows/backend.yml"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - run: dotnet restore backend/Meetly.slnx
+      - run: dotnet build backend/Meetly.slnx --no-restore -c Release
+
+      # Контрактные тесты: набор маршрутов совпадает со спекой.
+      - run: dotnet test backend/Meetly.slnx --no-build -c Release
+
+      # Сгенерированные DTO не должны отставать от контракта.
+      - name: Проверить свежесть Meetly.Contracts
+        working-directory: backend
+        run: |
+          dotnet tool restore
+          dotnet nswag run src/Meetly.Contracts/nswag.json
+          if ! git diff --quiet src/Meetly.Contracts/Generated; then
+            echo "::error::Meetly.Contracts устарел. Запустите: dotnet nswag run src/Meetly.Contracts/nswag.json"
+            exit 1
+          fi
+
+  contract-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Поднять API
+        run: |
+          dotnet run --project backend/src/Meetly.Api -c Release --urls http://localhost:5000 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:5000/api/admin/profile > /dev/null && break
+            sleep 2
+          done
+
+      # Schemathesis сам генерит запросы по схеме и валидирует РЕАЛЬНЫЕ ответы.
+      # Это то, что ловит дрейф реализации от контракта.
+      - name: Проверить реализацию против спеки
+        run: |
+          pip install schemathesis
+          schemathesis run contracts/dist/openapi.yaml \
+            --url http://localhost:5000 \
+            --checks all \
+            --max-failures 10
+        continue-on-error: true # TODO: снять, когда эндпоинты перестанут быть заглушками

@@ -1,0 +1,25 @@
+{
+  "name": "meetly",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Meetly — сервис записи на встречи. Монорепозиторий: контракт, бэкенд, фронтенд.",
+  "workspaces": [
+    "contracts",
+    "frontend"
+  ],
+  "scripts": {
+    "contract:build": "npm run build -w @meetly/contracts",
+    "contract:watch": "npm run watch -w @meetly/contracts",
+    "contract:format": "npm run format -w @meetly/contracts",
+    "contract:lint": "npm run lint -w @meetly/contracts && npm run lint:openapi -w @meetly/contracts",
+    "contract:check": "npm run contract:build && git diff --exit-code contracts/dist/openapi.yaml",
+    "api:types": "npm run api:types -w @meetly/frontend",
+    "mock": "npm run mock -w @meetly/contracts",
+    "docs": "npm run docs -w @meetly/contracts",
+    "dev:frontend": "npm run dev -w @meetly/frontend",
+    "build:frontend": "npm run build -w @meetly/frontend",
+    "build:backend": "dotnet build backend/Meetly.slnx",
+    "test:backend": "dotnet test backend/Meetly.slnx",
+    "contracts:csharp": "cd backend && dotnet nswag run src/Meetly.Contracts/nswag.json"
+  }
+}

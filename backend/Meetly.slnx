@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Meetly.Api/Meetly.Api.csproj" />
+    <Project Path="src/Meetly.Application/Meetly.Application.csproj" />
+    <Project Path="src/Meetly.Contracts/Meetly.Contracts.csproj" />
+    <Project Path="src/Meetly.Domain/Meetly.Domain.csproj" />
+    <Project Path="src/Meetly.Infrastructure/Meetly.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Meetly.ContractTests/Meetly.ContractTests.csproj" />
+    <Project Path="tests/Meetly.IntegrationTests/Meetly.IntegrationTests.csproj" />
+    <Project Path="tests/Meetly.UnitTests/Meetly.UnitTests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,75 @@
+name: contract
+
+on:
+  push:
+    branches: [main]
+    paths: ["contracts/**", ".github/workflows/contract.yml"]
+  pull_request:
+    paths: ["contracts/**", ".github/workflows/contract.yml"]
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # 1. Спека компилируется без предупреждений и проходит линт OpenAPI.
+      - name: Проверить спецификацию
+        run: npm run contract:lint
+
+      # 2. Закоммиченный dist/openapi.yaml соответствует исходникам .tsp.
+      #    Без этого гейта фронт сгенерит типы по устаревшему YAML.
+      - name: Проверить свежесть openapi.yaml
+        run: |
+          npm run contract:build
+          if ! git diff --quiet contracts/dist/openapi.yaml; then
+            echo "::error::contracts/dist/openapi.yaml устарел. Запустите: npm run contract:build"
+            git diff contracts/dist/openapi.yaml
+            exit 1
+          fi
+
+      # 3. Сгенерированные типы фронтенда тоже не должны отставать.
+      - name: Проверить свежесть типов фронтенда
+        run: |
+          npm run api:types
+          if ! git diff --quiet frontend/src/api/schema.d.ts; then
+            echo "::error::frontend/src/api/schema.d.ts устарел. Запустите: npm run api:types"
+            exit 1
+          fi
+
+  breaking-changes:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Достать базовую версию контракта
+        run: |
+          git show origin/${{ github.base_ref }}:contracts/dist/openapi.yaml > /tmp/base-openapi.yaml \
+            || echo "openapi: 3.1.0" > /tmp/base-openapi.yaml
+
+      # Ломающее изменение контракта = красный билд на этапе ревью,
+      # а не сломанный фронт после релиза.
+      - name: Проверить обратную совместимость
+        uses: oasdiff/oasdiff-action/breaking@main
+        with:
+          base: /tmp/base-openapi.yaml
+          revision: contracts/dist/openapi.yaml
+          fail-on: ERR
+
+      - name: Отчёт об изменениях контракта
+        uses: oasdiff/oasdiff-action/changelog@main
+        with:
+          base: /tmp/base-openapi.yaml
+          revision: contracts/dist/openapi.yaml

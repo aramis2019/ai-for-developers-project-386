@@ -1,0 +1,28 @@
+{
+  "name": "@meetly/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Единый источник истины API-контракта Meetly: TypeSpec -> OpenAPI 3.1",
+  "type": "module",
+  "tspMain": "main.tsp",
+  "scripts": {
+    "build": "tsp compile .",
+    "watch": "tsp compile . --watch",
+    "format": "tsp format \"**/*.tsp\"",
+    "lint": "tsp compile . --no-emit --warn-as-error",
+    "lint:openapi": "redocly lint dist/openapi.yaml",
+    "mock": "prism mock dist/openapi.yaml --port 4010 --errors --cors",
+    "docs": "redocly preview-docs dist/openapi.yaml"
+  },
+  "dependencies": {
+    "@typespec/compiler": "^1.15.0",
+    "@typespec/http": "^1.15.0",
+    "@typespec/openapi": "^1.15.0",
+    "@typespec/openapi3": "^1.15.0",
+    "@typespec/rest": "^0.76.0"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.6.0",
+    "@stoplight/prism-cli": "^5.14.2"
+  }
+}

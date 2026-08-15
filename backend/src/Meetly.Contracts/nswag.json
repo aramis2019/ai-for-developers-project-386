@@ -1,0 +1,27 @@
+{
+  "runtime": "Net100",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "../../../contracts/dist/openapi.yaml"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "generateClientClasses": false,
+      "generateClientInterfaces": false,
+      "generateDtoTypes": true,
+      "namespace": "Meetly.Contracts",
+      "className": "MeetlyClient",
+      "generateOptionalPropertiesAsNullable": true,
+      "generateNullableReferenceTypes": true,
+      "generateNativeRecords": true,
+      "dateTimeType": "System.DateTimeOffset",
+      "arrayType": "System.Collections.Generic.IReadOnlyList",
+      "arrayInstanceType": "System.Collections.Generic.List",
+      "dictionaryType": "System.Collections.Generic.IReadOnlyDictionary",
+      "requiredPropertiesMustBeDefined": true,
+      "jsonLibrary": "SystemTextJson",
+      "output": "Generated/Contracts.g.cs"
+    }
+  }
+}

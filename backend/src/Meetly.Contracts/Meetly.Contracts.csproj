@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    DTO-контракты, СГЕНЕРИРОВАННЫЕ из contracts/dist/openapi.yaml.
+
+    Правило: файлы в Generated/ руками не редактируются.
+    Перегенерация:  dotnet tool restore && dotnet nswag run src/Meetly.Contracts/nswag.json
+
+    Проект листовой: не ссылается ни на Domain, ни на Application.
+    Это граница адаптера — контроллеры мапят эти DTO в доменные модели.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Сгенерированный код не обязан проходить наши правила стиля. -->
+    <NoWarn>$(NoWarn);CS1591;CS8618;CS8625</NoWarn>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,26 @@
+name: frontend
+
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/**", "contracts/dist/**", "package.json", ".github/workflows/frontend.yml"]
+  pull_request:
+    paths: ["frontend/**", "contracts/dist/**", "package.json", ".github/workflows/frontend.yml"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Типы выведены из контракта: несовпадение путей или полей — ошибка tsc.
+      - run: npm run typecheck -w @meetly/frontend
+
+      - run: npm run build -w @meetly/frontend

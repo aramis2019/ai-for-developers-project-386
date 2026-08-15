@@ -1,0 +1,21 @@
+# Владельцы кода. GitHub требует апрув владельца для мержа PR,
+# если в репозитории включено правило "Require review from Code Owners".
+
+# Контракт — общая зона ответственности. Изменение требует апрува ОБЕИХ команд.
+# Это и делает спецификацию «общей»: не расположение папки, а процесс.
+/contracts/                 @aramis2019
+/contracts/docs/domain.md   @aramis2019
+/contracts/docs/adr/        @aramis2019
+
+# Сгенерированные артефакты правятся только генератором.
+/contracts/dist/                  @aramis2019
+/frontend/src/api/schema.d.ts     @aramis2019
+/backend/src/Meetly.Contracts/Generated/ @aramis2019
+
+/backend/    @aramis2019
+/frontend/   @aramis2019
+
+# TODO: заменить @aramis2019 на реальные команды, когда они появятся:
+#   /contracts/  @org/backend-team @org/frontend-team
+#   /backend/    @org/backend-team
+#   /frontend/   @org/frontend-team
