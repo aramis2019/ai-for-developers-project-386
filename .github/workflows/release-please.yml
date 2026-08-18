@@ -1,0 +1,30 @@
+name: release-please
+
+# release-please слушает пуши в main, парсит Conventional Commits и держит
+# «release PR» — накопительный PR с обновлённым CHANGELOG.md и bump'ом версии
+# в package.json. Мёрдж этого PR = релиз: создаётся тег vX.Y.Z и GitHub Release.
+#
+# Тип бампа определяется по типам коммитов с прошлого релиза:
+#   feat        → minor (в pre-major режиме — patch, см. bump-patch-for-minor-pre-major)
+#   fix / perf  → patch
+#   feat! / BREAKING CHANGE в теле → major
+#
+# Конфиг: release-please-config.json + .release-please-manifest.json.
+# Соглашение о коммитах: см. AGENTS.md, раздел «Conventional Commits».
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

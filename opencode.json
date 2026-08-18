@@ -5,5 +5,48 @@
       "*": "allow",
       "git-release": "ask"
     }
+  },
+  "mcp": {
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_TOKEN}",
+        "X-MCP-Readonly": "true"
+      }
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp@latest",
+        "--headless",
+        "--isolated",
+        "--allowed-origins",
+        "localhost:5173;127.0.0.1:4010;localhost:5000"
+      ],
+      "enabled": true,
+      "timeout": 60000
+    },
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp@latest"],
+      "enabled": true,
+      "timeout": 30000
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--headless",
+        "--isolated"
+      ],
+      "enabled": true,
+      "timeout": 60000
+    }
   }
 }

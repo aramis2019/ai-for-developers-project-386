@@ -1,0 +1,196 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: /
+        - heading "Meetly" [level=3] [ref=e8]
+      - generic [ref=e9]:
+        - generic [ref=e10]: "Время: UTC+1"
+        - link "Админка" [ref=e12] [cursor=pointer]:
+          - /url: /admin/bookings
+  - main [ref=e13]:
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - link "Виды встреч" [ref=e50] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e51]: /
+        - paragraph [ref=e52]: Знакомство
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - heading "Знакомство" [level=1] [ref=e55]
+          - generic [ref=e56]: 30 мин
+        - paragraph [ref=e58]: Короткий звонок для знакомства и обсуждения целей.
+      - generic [ref=e60]:
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - button [disabled] [ref=e67]
+            - button "август 2026" [ref=e70] [cursor=pointer]
+            - button [ref=e71] [cursor=pointer]
+          - table [ref=e74]:
+            - rowgroup [ref=e75]:
+              - row [ref=e76]:
+                - columnheader "пн" [ref=e77]
+                - columnheader "вт" [ref=e78]
+                - columnheader "ср" [ref=e79]
+                - columnheader "чт" [ref=e80]
+                - columnheader "пт" [ref=e81]
+                - columnheader "сб" [ref=e82]
+                - columnheader "вс" [ref=e83]
+            - rowgroup [ref=e84]:
+              - row [ref=e85]:
+                - cell [ref=e86]:
+                  - button "27 июля 2026" [disabled] [ref=e87]:
+                    - generic [ref=e88]: "27"
+                - cell [ref=e90]:
+                  - button "28 июля 2026" [disabled] [ref=e91]:
+                    - generic [ref=e92]: "28"
+                - cell [ref=e94]:
+                  - button "29 июля 2026" [disabled] [ref=e95]:
+                    - generic [ref=e96]: "29"
+                - cell [ref=e98]:
+                  - button "30 июля 2026" [disabled] [ref=e99]:
+                    - generic [ref=e100]: "30"
+                - cell [ref=e102]:
+                  - button "31 июля 2026" [disabled] [ref=e103]:
+                    - generic [ref=e104]: "31"
+                - cell [ref=e106]:
+                  - button "1 августа 2026" [disabled] [ref=e107]:
+                    - generic [ref=e108]: "1"
+                - cell [ref=e110]:
+                  - button "2 августа 2026" [disabled] [ref=e111]:
+                    - generic [ref=e112]: "2"
+              - row [ref=e114]:
+                - cell [ref=e115]:
+                  - button "3 августа 2026" [disabled] [ref=e116]:
+                    - generic [ref=e117]: "3"
+                - cell [ref=e119]:
+                  - button "4 августа 2026" [disabled] [ref=e120]:
+                    - generic [ref=e121]: "4"
+                - cell [ref=e123]:
+                  - button "5 августа 2026" [disabled] [ref=e124]:
+                    - generic [ref=e125]: "5"
+                - cell [ref=e127]:
+                  - button "6 августа 2026" [disabled] [ref=e128]:
+                    - generic [ref=e129]: "6"
+                - cell [ref=e131]:
+                  - button "7 августа 2026" [disabled] [ref=e132]:
+                    - generic [ref=e133]: "7"
+                - cell [ref=e135]:
+                  - button "8 августа 2026" [disabled] [ref=e136]:
+                    - generic [ref=e137]: "8"
+                - cell [ref=e139]:
+                  - button "9 августа 2026" [disabled] [ref=e140]:
+                    - generic [ref=e141]: "9"
+              - row [ref=e143]:
+                - cell [ref=e144]:
+                  - button "10 августа 2026" [disabled] [ref=e145]:
+                    - generic [ref=e146]: "10"
+                - cell [ref=e148]:
+                  - button "11 августа 2026" [disabled] [ref=e149]:
+                    - generic [ref=e150]: "11"
+                - cell [ref=e152]:
+                  - button "12 августа 2026" [disabled] [ref=e153]:
+                    - generic [ref=e154]: "12"
+                - cell [ref=e156]:
+                  - button "13 августа 2026" [disabled] [ref=e157]:
+                    - generic [ref=e158]: "13"
+                - cell [ref=e160]:
+                  - button "14 августа 2026" [disabled] [ref=e161]:
+                    - generic [ref=e162]: "14"
+                - cell [ref=e164]:
+                  - button "15 августа 2026" [disabled] [ref=e165]:
+                    - generic [ref=e166]: "15"
+                - cell [ref=e168]:
+                  - button "16 августа 2026" [disabled] [ref=e169]:
+                    - generic [ref=e170]: "16"
+              - row [ref=e172]:
+                - cell [ref=e173]:
+                  - button "17 августа 2026" [disabled] [ref=e174]:
+                    - generic [ref=e175]: "17"
+                - cell [ref=e177]:
+                  - button "18 августа 2026" [ref=e178] [cursor=pointer]:
+                    - generic [ref=e179]: "18"
+                - cell [ref=e182]:
+                  - button "19 августа 2026" [ref=e183] [cursor=pointer]:
+                    - generic [ref=e184]: "19"
+                - cell [ref=e187]:
+                  - button "20 августа 2026" [ref=e188] [cursor=pointer]:
+                    - generic [ref=e189]: "20"
+                - cell [ref=e192]:
+                  - button "21 августа 2026" [ref=e193] [cursor=pointer]:
+                    - generic [ref=e194]: "21"
+                - cell [ref=e197]:
+                  - button "22 августа 2026" [ref=e198] [cursor=pointer]:
+                    - generic [ref=e199]: "22"
+                - cell [ref=e202]:
+                  - button "23 августа 2026" [ref=e203] [cursor=pointer]:
+                    - generic [ref=e204]: "23"
+              - row [ref=e207]:
+                - cell [ref=e208]:
+                  - button "24 августа 2026" [ref=e209] [cursor=pointer]:
+                    - generic [ref=e210]: "24"
+                - cell [ref=e213]:
+                  - button "25 августа 2026" [ref=e214] [cursor=pointer]:
+                    - generic [ref=e215]: "25"
+                - cell [ref=e218]:
+                  - button "26 августа 2026" [ref=e219] [cursor=pointer]:
+                    - generic [ref=e220]: "26"
+                - cell [ref=e223]:
+                  - button "27 августа 2026" [ref=e224] [cursor=pointer]:
+                    - generic [ref=e225]: "27"
+                - cell [ref=e228]:
+                  - button "28 августа 2026" [ref=e229] [cursor=pointer]:
+                    - generic [ref=e230]: "28"
+                - cell [ref=e233]:
+                  - button "29 августа 2026" [ref=e234] [cursor=pointer]:
+                    - generic [ref=e235]: "29"
+                - cell [ref=e238]:
+                  - button "30 августа 2026" [ref=e239] [cursor=pointer]:
+                    - generic [ref=e240]: "30"
+              - row [ref=e243]:
+                - cell [ref=e244]:
+                  - button "31 августа 2026" [ref=e245] [cursor=pointer]:
+                    - generic [ref=e246]: "31"
+                - cell [ref=e249]:
+                  - button "1 сентября 2026" [disabled] [ref=e250]:
+                    - generic [ref=e251]: "1"
+                - cell [ref=e253]:
+                  - button "2 сентября 2026" [disabled] [ref=e254]:
+                    - generic [ref=e255]: "2"
+                - cell [ref=e257]:
+                  - button "3 сентября 2026" [disabled] [ref=e258]:
+                    - generic [ref=e259]: "3"
+                - cell [ref=e261]:
+                  - button "4 сентября 2026" [disabled] [ref=e262]:
+                    - generic [ref=e263]: "4"
+                - cell [ref=e265]:
+                  - button "5 сентября 2026" [disabled] [ref=e266]:
+                    - generic [ref=e267]: "5"
+                - cell [ref=e269]:
+                  - button "6 сентября 2026" [disabled] [ref=e270]:
+                    - generic [ref=e271]: "6"
+        - generic [ref=e274]:
+          - generic [ref=e275]:
+            - paragraph [ref=e276]: 18 августа, вторник
+            - paragraph [ref=e277]: Время указано в вашем поясе (UTC+1)
+            - generic [ref=e278]:
+              - button "10:00" [ref=e279] [cursor=pointer]
+              - button "10:30" [ref=e282] [cursor=pointer]
+              - button "11:00" [ref=e285] [cursor=pointer]
+              - button "11:30" [ref=e288] [cursor=pointer]
+              - button "12:00" [ref=e291] [cursor=pointer]
+              - button "12:30" [ref=e294] [cursor=pointer]
+              - button "13:00" [ref=e297] [cursor=pointer]
+              - button "13:30" [ref=e300] [cursor=pointer]
+              - button "14:00" [ref=e303] [cursor=pointer]
+              - button "14:30" [ref=e306] [cursor=pointer]
+              - button "15:00" [ref=e309] [cursor=pointer]
+              - button "15:30" [ref=e312] [cursor=pointer]
+              - button "16:00" [ref=e315] [cursor=pointer]
+              - button "16:30" [ref=e318] [cursor=pointer]
+              - button "17:00" [ref=e321] [cursor=pointer]
+              - button "17:30" [ref=e324] [cursor=pointer]
+              - button "18:00" [ref=e327] [cursor=pointer]
+              - button "18:30" [ref=e330] [cursor=pointer]
+          - paragraph [ref=e333]: Выберите время, чтобы заполнить контактные данные.
+  - paragraph [ref=e22]: Запись доступна на ближайшие 14 дней.

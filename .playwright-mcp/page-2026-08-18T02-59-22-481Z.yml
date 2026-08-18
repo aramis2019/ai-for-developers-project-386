@@ -1,0 +1,18 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e6]:
+      - generic [ref=f1e8]:
+        - heading "Meetly" [level=3] [ref=f1e9]
+        - paragraph [ref=f1e10]: админка
+      - generic [ref=f1e12]:
+        - link "Встречи" [ref=f1e13] [cursor=pointer]:
+          - /url: /admin/bookings
+        - link "Типы событий" [ref=f1e14] [cursor=pointer]:
+          - /url: /admin/event-types
+        - link "На сайт" [ref=f1e15] [cursor=pointer]:
+          - /url: /
+  - main [ref=f1e16]:
+    - generic [ref=f1e19]:
+      - heading "Предстоящие встречи" [level=1] [ref=f1e21]
+      - paragraph [ref=f1e22]: Все типы событий в одном списке — занятость в календаре сквозная.
+    - paragraph [ref=f1e26]: Расписание владельца — в UTC. Время встреч ниже показано в вашем поясе (UTC+1).

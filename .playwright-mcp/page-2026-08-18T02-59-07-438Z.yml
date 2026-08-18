@@ -1,0 +1,27 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: /
+        - heading "Meetly" [level=3] [ref=e8]
+      - generic [ref=e9]:
+        - generic [ref=e10]: "Время: UTC+1"
+        - link "Админка" [ref=e12] [cursor=pointer]:
+          - /url: /admin/bookings
+  - main [ref=e13]:
+    - generic [ref=e359]:
+      - generic [ref=e360]:
+        - heading "Вы записаны" [level=1] [ref=e361]
+        - paragraph [ref=e362]: Подтверждение отправлено на ivan@example.com
+      - generic [ref=e364]:
+        - generic [ref=e365]:
+          - paragraph [ref=e366]: Знакомство
+          - paragraph [ref=e367]: 30 мин
+        - paragraph [ref=e368]: 18 августа, вторник
+        - paragraph [ref=e369]: 10:00 – 10:30
+        - paragraph [ref=e370]: Время в вашем поясе (UTC+1)
+      - alert [ref=e371]:
+        - paragraph [ref=e375]: Чтобы отменить или перенести встречу, напишите владельцу календаря — в текущей версии сервиса это делается вручную.
+      - link "Записаться ещё раз" [ref=e376] [cursor=pointer]:
+        - /url: /
+  - paragraph [ref=e22]: Запись доступна на ближайшие 14 дней.

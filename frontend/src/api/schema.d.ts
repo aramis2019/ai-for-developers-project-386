@@ -473,6 +473,33 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "items": [
+                     *         {
+                     *           "id": "intro-call",
+                     *           "title": "Знакомство",
+                     *           "description": "Короткий созвон, чтобы обсудить задачу и понять, чем я могу помочь.",
+                     *           "durationMinutes": 30,
+                     *           "createdAt": "2026-08-01T07:12:44Z"
+                     *         },
+                     *         {
+                     *           "id": "deep-dive",
+                     *           "title": "Разбор задачи",
+                     *           "description": "Час на детальный разбор с демонстрацией экрана и правками по ходу.",
+                     *           "durationMinutes": 60,
+                     *           "createdAt": "2026-08-03T15:40:09Z"
+                     *         },
+                     *         {
+                     *           "id": "quick-sync",
+                     *           "title": "Быстрая синхронизация",
+                     *           "description": "Пятнадцать минут на один конкретный вопрос без подготовки.",
+                     *           "durationMinutes": 15,
+                     *           "createdAt": "2026-08-11T06:55:20Z"
+                     *         }
+                     *       ]
+                     *     }
+                     */
                     "application/json": components["schemas"]["EventTypeList"];
                 };
             };
@@ -487,6 +514,14 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "id": "quick-sync",
+                 *       "title": "Быстрая синхронизация",
+                 *       "description": "Пятнадцать минут на один конкретный вопрос без подготовки.",
+                 *       "durationMinutes": 15
+                 *     }
+                 */
                 "application/json": components["schemas"]["EventTypeCreate"];
             };
         };
@@ -497,6 +532,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "id": "quick-sync",
+                     *       "title": "Быстрая синхронизация",
+                     *       "description": "Пятнадцать минут на один конкретный вопрос без подготовки.",
+                     *       "durationMinutes": 15,
+                     *       "createdAt": "2026-08-11T06:55:20Z"
+                     *     }
+                     */
                     "application/json": components["schemas"]["EventType"];
                 };
             };
@@ -544,6 +588,20 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "id": "owner",
+                     *       "name": "Анна Смирнова",
+                     *       "email": "anna@meetly.local",
+                     *       "timeZone": "UTC",
+                     *       "workingHours": {
+                     *         "start": "09:00",
+                     *         "end": "18:00"
+                     *       },
+                     *       "slotStepMinutes": 30,
+                     *       "bookingWindowDays": 14
+                     *     }
+                     */
                     "application/json": components["schemas"]["Owner"];
                 };
             };

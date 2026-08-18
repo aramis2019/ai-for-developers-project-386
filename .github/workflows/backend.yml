@@ -49,8 +49,12 @@ jobs:
           python-version: "3.12"
 
       - name: Поднять API
+        # --no-launch-profile игнорирует Properties/launchSettings.json,
+        # который принудительно ставит ASPNETCORE_ENVIRONMENT=Development
+        # (а значит Storage:Provider=Postgres → падение без БД).
+        # В CI нужен Production-профиль с InMemory-хранилищем.
         run: |
-          dotnet run --project backend/src/Meetly.Api -c Release --urls http://localhost:5000 &
+          dotnet run --project backend/src/Meetly.Api -c Release --no-launch-profile --urls http://localhost:5000 &
           for i in $(seq 1 30); do
             curl -sf http://localhost:5000/api/admin/profile > /dev/null && break
             sleep 2
@@ -58,11 +62,20 @@ jobs:
 
       # Schemathesis сам генерит запросы по схеме и валидирует РЕАЛЬНЫЕ ответы.
       # Это то, что ловит дрейф реализации от контракта.
+      #
+      # --exclude-checks=positive_data_acceptance: этот чек не годится для
+      # POST /api/bookings — эндпоинт имеет runtime-валидацию (окно 14 суток,
+      # выравнивание по сетке, рабочие часы), которую невозможно выразить в
+      # JSON Schema. Валидные по схеме `start` часто попадают в прошлое или вне
+      # окна, сервер честно отвечает 422, но schemathesis считает это дрейфом.
+      # Оставляем остальные чеки (server_error, content_type_conformance,
+      # response_schema_conformance, status_code_conformance) — они реально
+      # ловят рассогласование реализации и спеки.
       - name: Проверить реализацию против спеки
         run: |
           pip install schemathesis
           schemathesis run contracts/dist/openapi.yaml \
             --url http://localhost:5000 \
             --checks all \
+            --exclude-checks positive_data_acceptance \
             --max-failures 10
-        continue-on-error: true # TODO: снять, когда эндпоинты перестанут быть заглушками
