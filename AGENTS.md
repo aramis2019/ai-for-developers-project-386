@@ -289,8 +289,8 @@ TypeScript/C#/SQL, всё, что проверяется компиляцией 
 
 Все коммиты в этом репозитории — включая коммиты агента — оформляются по
 [Conventional Commits 1.0](https://www.conventionalcommits.org/ru/v1.0.0/).
-Это питает release-please: он парсит историю с прошлого тега, генерирует
-CHANGELOG.md и решает, какой bump версии выкатывать.
+Это питает commit-and-tag-version: он парсит историю с прошлого тега,
+генерирует CHANGELOG.md и решает, какой bump версии выкатывать.
 
 Формат заголовка:
 
@@ -328,29 +328,36 @@ CHANGELOG.md и решает, какой bump версии выкатывать.
 feat(backend): реализовать сквозную занятость через exclusion constraint
 fix(frontend): не пересобирать start слота на клиенте — 422 SLOT_NOT_ALIGNED
 docs(contracts): описать сценарии в contracts/docs/scenarios.md
-ci: добавить release-please workflow
+ci: добавить workflow публикации релиза в Gitea
 chore(deps): обновить Npgsql до 10.0.3
 feat(contracts)!: сделать guest.note обязательным
 ```
 
 Что делать нельзя: `misc`, `stuff`, `wip`, `Update file.cs` — такие сообщения
-release-please проигнорирует, и релиз не выйдет.
+commit-and-tag-version проигнорирует, и в changelog они не попадут.
 
-## Релизы: release-please
+## Релизы: commit-and-tag-version
 
-- Файлы: `release-please-config.json` (single package, `release-type: node`) и
-  `.release-please-manifest.json` (текущая версия для каждого пакета — сейчас
-  только корень `.`). Workflow: `.github/workflows/release-please.yml`.
-- Одна версия на весь монорепо. Тег вида `v0.2.0`, обновляется корневой
-  `package.json` и `CHANGELOG.md`.
-- Как это работает после мёрджа в `main`:
-  1. workflow смотрит коммиты с последнего тега;
-  2. открывает или обновляет «release PR» — с CHANGELOG и bump'ом версии;
-  3. вы мёрджите release PR → создаётся тег и GitHub Release.
-- Ручной релиз через `git tag`/`gh release` **не делать** — release-please
-  перестанет видеть базовую точку и «съест» релиз следующим PR.
-- При изменении версии вручную (не через release PR) обновляйте оба файла:
-  `.release-please-manifest.json` и `package.json`.
+Release-please с Gitea не работает (ходит в GitHub API), поэтому релиз готовит
+`commit-and-tag-version` локально, а публикует Gitea Actions.
+
+- Файлы: `.versionrc.json` (секции CHANGELOG и форматы ссылок на Gitea) и
+  workflow `.github/workflows/release.yml` — на пуш тега `v*` создаёт
+  Gitea Release с текстом секции из `CHANGELOG.md`.
+- Одна версия на весь монорепо. Тег вида `v0.2.0`, обновляются корневые
+  `package.json`, `package-lock.json` и `CHANGELOG.md`.
+- Как выпустить релиз:
+  1. `npm run release:dry` — предпросмотр: какой bump и какой changelog выйдут;
+  2. `npm run release` — bump версии, CHANGELOG.md, коммит
+     `chore(release): vX.Y.Z` и тег;
+  3. `git push --follow-tags origin main` — пуш тега запускает `release.yml`.
+- Самый первый релиз: `npm run release -- --first-release` — тег на текущую
+  версию из `package.json`, без bump'а.
+- Переопределить версию: `npm run release -- --release-as 1.0.0`
+  (или `minor`/`patch`).
+- Теги руками (`git tag`) не создавать — версия и CHANGELOG разъедутся
+  с историей. Роль «мёрджа release PR» здесь играет запуск `npm run release`:
+  до него ничего не публикуется.
 
 ## Перед коммитом
 

@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "description": "Meetly — сервис записи на встречи. Монорепозиторий: контракт, бэкенд, фронтенд.",
+  "repository": {
+    "type": "git",
+    "url": "https://gitea.lurax.ru/LinnetLab/Hexlet.Meetly.git"
+  },
   "workspaces": [
     "contracts",
     "frontend"
@@ -20,6 +24,11 @@
     "build:frontend": "npm run build -w @meetly/frontend",
     "build:backend": "dotnet build backend/Meetly.slnx",
     "test:backend": "dotnet test backend/Meetly.slnx",
-    "contracts:csharp": "cd backend && dotnet nswag run src/Meetly.Contracts/nswag.json"
+    "contracts:csharp": "cd backend && dotnet nswag run src/Meetly.Contracts/nswag.json",
+    "release": "commit-and-tag-version",
+    "release:dry": "commit-and-tag-version --dry-run"
+  },
+  "devDependencies": {
+    "commit-and-tag-version": "^13.1.2"
   }
 }

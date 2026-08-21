@@ -1,0 +1,75 @@
+# Продакшен-стек Meetly на VPS (ams-1-vm-h0yq, 5.129.226.164).
+#
+# Рабочая копия живёт на сервере в /home/development/meetly/ вместе с .env
+# (MEETLY_DB_PASSWORD) и deploy.sh. Этот файл в репозитории — канонический
+# источник: при изменении скопировать на сервер (scp) и запустить deploy.sh.
+#
+# Edge — общий Traefik (/home/development/traefik-app, сеть webproxy):
+# TLS от Let's Encrypt (резолвер letsEncrypt), HTTP→HTTPS редирект.
+# Приложение видит только Traefik; Postgres — только приложение
+# (внутренняя сеть, наружу не публикуется).
+
+services:
+  meetly-app:
+    image: docker.lurax.ru/linnetlab/meetly:latest
+    container_name: meetly-app
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PORT: "8080"
+      Storage__Provider: Postgres
+      ConnectionStrings__Meetly: Host=meetly-db;Port=5432;Database=meetly;Username=meetly;Password=${MEETLY_DB_PASSWORD}
+    depends_on:
+      meetly-db:
+        condition: service_healthy
+    networks:
+      - webproxy
+      - meetly-internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.meetly.rule=Host(`meetly.linnetlab.com`)"
+      - "traefik.http.routers.meetly.entrypoints=https"
+      - "traefik.http.routers.meetly.tls=true"
+      - "traefik.http.routers.meetly.tls.certresolver=letsEncrypt"
+      - "traefik.http.services.meetly.loadbalancer.server.port=8080"
+      # У контейнера две сети — явно говорим Traefik, через какую ходить.
+      - "traefik.docker.network=webproxy"
+
+  meetly-db:
+    image: postgres:17-alpine
+    container_name: meetly-db
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      POSTGRES_DB: meetly
+      POSTGRES_USER: meetly
+      POSTGRES_PASSWORD: ${MEETLY_DB_PASSWORD}
+    volumes:
+      - meetly-db-data:/var/lib/postgresql/data
+    networks:
+      - meetly-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meetly -d meetly"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  meetly-db-data:
+
+networks:
+  webproxy:
+    external: true
+  meetly-internal:

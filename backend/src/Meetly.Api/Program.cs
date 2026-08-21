@@ -169,6 +169,42 @@ pub.MapPost("/bookings", async (BookingCreate body, BookingService bookingServic
     };
 });
 
+// ---------------------------------------------------------------------------
+// СТАТИКА ФРОНТЕНДА (только продакшен-образ)
+// ---------------------------------------------------------------------------
+// В Docker-образе собранный React-бандл лежит в wwwroot. Guard по index.html:
+// в dev (фронт на Vite :5173) и в тестах (WebApplicationFactory) каталога нет,
+// ветка не активируется — поведение API и список эндпоинтов не меняются.
+var webRoot = app.Environment.WebRootPath is { Length: > 0 } configured
+    ? configured
+    : Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+if (File.Exists(Path.Combine(webRoot, "index.html")))
+{
+    // SPA-fallback для react-router: GET не к /api, закончившийся 404,
+    // переигрывается как index.html.
+    //
+    // Именно middleware, а не MapFallbackToFile: fallback-эндпоинт с catch-all
+    // перехватывал бы и /api — неподдерживаемый метод (GET /api/bookings)
+    // получал бы 200 с HTML вместо контрактного 405 от роутинга (это ловит
+    // Schemathesis, проверка unsupported_method). Здесь переписываются только
+    // 404: ответы 405/409/422 от /api проходят нетронутыми.
+    app.Use(async (context, next) =>
+    {
+        await next();
+
+        if (context.Response.StatusCode == StatusCodes.Status404NotFound
+            && !context.Response.HasStarted
+            && HttpMethods.IsGet(context.Request.Method)
+            && !context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Request.Path = "/index.html";
+            context.Response.StatusCode = StatusCodes.Status200OK;
+            await next();
+        }
+    });
+    app.UseStaticFiles();
+}
+
 app.Run();
 
 /// <summary>Точка входа, открытая для WebApplicationFactory в тестах.</summary>

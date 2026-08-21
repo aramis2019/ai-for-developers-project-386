@@ -1,0 +1,18 @@
+{
+  "header": "# Changelog\n\nВсе заметные изменения проекта фиксируются в этом файле.\nГенерируется commit-and-tag-version из Conventional Commits — вручную не редактировать.\n",
+  "commitUrlFormat": "https://gitea.lurax.ru/LinnetLab/Hexlet.Meetly/commit/{{hash}}",
+  "compareUrlFormat": "https://gitea.lurax.ru/LinnetLab/Hexlet.Meetly/compare/{{previousTag}}...{{currentTag}}",
+  "issueUrlFormat": "https://gitea.lurax.ru/LinnetLab/Hexlet.Meetly/issues/{{id}}",
+  "types": [
+    { "type": "feat", "section": "Функциональность" },
+    { "type": "fix", "section": "Исправления" },
+    { "type": "perf", "section": "Производительность" },
+    { "type": "refactor", "section": "Рефакторинг" },
+    { "type": "docs", "section": "Документация" },
+    { "type": "build", "section": "Сборка" },
+    { "type": "ci", "section": "CI" },
+    { "type": "test", "hidden": true },
+    { "type": "style", "hidden": true },
+    { "type": "chore", "hidden": true }
+  ]
+}

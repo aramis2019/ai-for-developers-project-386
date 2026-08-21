@@ -1,0 +1,36 @@
+# Контекст сборки: нужен только исходный код фронта и бэка + npm-манифесты.
+
+# VCS и служебные каталоги
+.git
+.github
+.opencode
+.playwright-mcp
+.schemathesis
+infrastructure
+
+# Node
+node_modules
+**/node_modules
+frontend/dist
+frontend/*.tsbuildinfo
+
+# Контракт: артефакты генерации закоммичены (schema.d.ts, Generated/),
+# сам workspace в образе не нужен — кроме манифеста для npm ci.
+contracts/**
+!contracts/package.json
+
+# .NET
+**/bin
+**/obj
+TestResults
+
+# Секреты и локальные конфиги — не должны попадать в образ
+**/.env
+**/.env.*
+backend/**/appsettings.*.local.json
+
+# Документация и прочее
+**/*.md
+CHANGELOG.md
+Dockerfile
+.dockerignore

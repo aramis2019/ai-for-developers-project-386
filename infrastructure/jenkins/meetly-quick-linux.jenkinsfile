@@ -1,0 +1,252 @@
+#!groovy
+
+// Meetly Quick Linux Build
+//
+// Checkout → npm ci → контрактные гейты → typecheck → тесты бэкенда →
+// docker image → smoke → push в Nexus (только main).
+//
+// Бандл фронта и publish бэка собираются внутри multi-stage Dockerfile,
+// поэтому публикуемый образ герметичен: состояние workspace агента на него
+// не влияет. Агентские стадии дают быструю обратную связь (контракт, типы,
+// тесты) до медленной сборки образа.
+//
+// Фильтрация веток (main, feat/*) живёт в multibranch-джобе с Gitea branch
+// source, не здесь: guard через `when` красил бы пропущенные ветки зелёным.
+
+pipeline {
+    agent { label 'LinnetLab_Meetly_Linux_Build' }
+
+    tools { nodejs 'node24' }
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        skipDefaultCheckout true
+    }
+
+    environment {
+        REGISTRY = 'docker.lurax.ru'
+        IMAGE    = 'linnetlab/meetly'
+        DOTNET_CLI_TELEMETRY_OPTOUT = '1'
+        DOTNET_NOLOGO = '1'
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    def shortSha = sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()
+                    // например 12-a1b2c3d — уникален, сортируем, ведёт к коммиту
+                    env.IMAGE_TAG = "${env.BUILD_NUMBER}-${shortSha}"
+                }
+            }
+        }
+
+        stage('Install') {
+            steps {
+                sh 'node --version && npm --version'
+                sh 'npm ci --no-audit --no-fund'
+            }
+        }
+
+        stage('Contract gates') {
+            steps {
+                sh 'npm run contract:lint'
+                // Свежесть закоммиченных артефактов: пересобрать и убедиться,
+                // что дерево чистое. Забытая перегенерация после правки .tsp —
+                // единственное, что контрактные тесты сами не поймают.
+                sh '''
+                    npm run contract:build
+                    if ! git diff --exit-code -- contracts/dist/openapi.yaml; then
+                        echo ""
+                        echo "contracts/dist/openapi.yaml устарел."
+                        echo "Запустите: npm run contract:build — и закоммитьте результат."
+                        exit 1
+                    fi
+                '''
+                sh '''
+                    npm run api:types
+                    if ! git diff --exit-code -- frontend/src/api/schema.d.ts; then
+                        echo ""
+                        echo "frontend/src/api/schema.d.ts устарел."
+                        echo "Запустите: npm run api:types — и закоммитьте результат."
+                        exit 1
+                    fi
+                '''
+            }
+        }
+
+        stage('C# DTO freshness') {
+            steps {
+                // nswag — локальный dotnet tool (backend/dotnet-tools.json).
+                // NuGet.config репозитория указывает на nuget.org с <clear/>,
+                // restore не зависит от глобальных настроек агента.
+                sh 'cd backend && dotnet tool restore'
+                sh '''
+                    npm run contracts:csharp
+                    if ! git diff --exit-code -- backend/src/Meetly.Contracts/Generated/; then
+                        echo ""
+                        echo "backend/src/Meetly.Contracts/Generated/ устарел."
+                        echo "Запустите: npm run contracts:csharp — и закоммитьте результат."
+                        exit 1
+                    fi
+                '''
+            }
+        }
+
+        stage('Typecheck') {
+            steps {
+                sh 'npm run typecheck -w @meetly/frontend'
+            }
+        }
+
+        stage('Backend tests') {
+            steps {
+                // -m:1 и без node reuse: агент общий и небольшой (2 vCPU / 3.7 GB),
+                // висящие MSBuild-воркеры на нём дороги.
+                sh '''
+                    dotnet build backend/Meetly.slnx \
+                        --configuration Release -m:1 -nodeReuse:false
+                '''
+                sh '''
+                    dotnet test backend/Meetly.slnx \
+                        --configuration Release --no-build
+                '''
+            }
+        }
+
+        stage('Docker image') {
+            steps {
+                sh "docker build --pull --build-arg APP_VERSION=${IMAGE_TAG} -t ${REGISTRY}/${IMAGE}:${IMAGE_TAG} ."
+            }
+        }
+
+        stage('Smoke + Schemathesis') {
+            steps {
+                // Гейт «контейнер стартует сам»: запуск без маппинга портов,
+                // curl из соседнего контейнера в том же network namespace —
+                // никаких конфликтов портов на общем агенте. Имя контейнера
+                // включает IMAGE_TAG: disableConcurrentBuilds не защищает от
+                // параллельной сборки другой ветки на том же узле.
+                sh '''
+                    smoke="meetly-smoke-$IMAGE_TAG"
+                    docker rm -f "$smoke" >/dev/null 2>&1 || true
+                    docker run -d --name "$smoke" -e PORT=8080 "$REGISTRY/$IMAGE:$IMAGE_TAG"
+                    if docker run --rm --network "container:$smoke" curlimages/curl:8.11.1 \
+                        -sf --retry 15 --retry-delay 1 --retry-connrefused \
+                        http://localhost:8080/api/event-types >/dev/null; then
+                        echo "smoke: API отвечает на PORT=8080"
+                    else
+                        echo "smoke: приложение не поднялось, логи контейнера:"
+                        docker logs "$smoke" || true
+                        docker rm -f "$smoke" >/dev/null 2>&1 || true
+                        exit 1
+                    fi
+
+                    # Schemathesis генерит запросы по OpenAPI и валидирует РЕАЛЬНЫЕ
+                    # ответы уже собранного образа — ловит дрейф реализации от спеки.
+                    # positive_data_acceptance исключён: POST /api/bookings имеет
+                    # runtime-валидацию (окно 14 суток, сетка, рабочие часы),
+                    # невыразимую в JSON Schema, — честные 422 не считаем дрейфом.
+                    status=0
+                    docker run --rm --network "container:$smoke" \
+                        -v "$PWD/contracts/dist/openapi.yaml:/openapi.yaml:ro" \
+                        schemathesis/schemathesis:stable run /openapi.yaml \
+                        --url http://localhost:8080 \
+                        --checks all \
+                        --exclude-checks positive_data_acceptance \
+                        --max-failures 10 || status=$?
+
+                    docker rm -f "$smoke" >/dev/null 2>&1 || true
+                    exit $status
+                '''
+            }
+        }
+
+        stage('Contract classification') {
+            steps {
+                // Репорт, не гейт: между релизами контракт «не в дикой природе»,
+                // жёсткий стоп живёт в сценарии git-release, который откажется
+                // занижать bump. Строка нужна, чтобы ломающее изменение было
+                // видно в день попадания в main, а не в день релиза.
+                // Если клон джобы не тянет теги — стадия честно скажет, что
+                // сравнивать не с чем.
+                sh '''
+                    LAST_TAG=$(git tag --list "v*" --sort=-v:refname | head -1)
+                    if [ -z "$LAST_TAG" ]; then
+                        echo "contract classification: релизных тегов нет — сравнивать не с чем"
+                    else
+                        git show "$LAST_TAG:contracts/dist/openapi.yaml" > .contract-base.yaml
+                        echo "contract classification vs $LAST_TAG:"
+                        docker run --rm -v "$PWD:/work:ro" tufin/oasdiff:latest changelog \
+                            /work/.contract-base.yaml /work/contracts/dist/openapi.yaml || true
+                        rm -f .contract-base.yaml
+                    fi
+                '''
+            }
+        }
+
+        stage('Push to Nexus') {
+            when { branch 'main' }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-docker-ci',
+                    usernameVariable: 'REG_USER',
+                    passwordVariable: 'REG_PASS',
+                )]) {
+                    // одинарные кавычки: секрет разворачивает shell, не Groovy
+                    sh 'echo "$REG_PASS" | docker login "$REGISTRY" -u "$REG_USER" --password-stdin'
+                }
+                sh "docker push ${REGISTRY}/${IMAGE}:${IMAGE_TAG}"
+                sh "docker tag ${REGISTRY}/${IMAGE}:${IMAGE_TAG} ${REGISTRY}/${IMAGE}:latest"
+                sh "docker push ${REGISTRY}/${IMAGE}:latest"
+            }
+        }
+
+        stage('Deploy to VPS') {
+            when { branch 'main' }
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'vps-ndl-meetly-deploy-ssh',
+                    keyFileVariable: 'DEPLOY_KEY',
+                )]) {
+                    // Ключ зажат forced command-ом в authorized_keys на VPS:
+                    // что бы ни запросили, выполняется только
+                    // /home/development/meetly/deploy.sh (docker compose pull
+                    // && up -d), без шелла и форвардинга. Приложение выходит
+                    // на https://meetly.linnetlab.com через общий Traefik.
+                    sh 'ssh -i "$DEPLOY_KEY" -p 52022 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new dev@5.129.226.164 deploy'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'command -v docker >/dev/null && docker rm -f "meetly-smoke-${IMAGE_TAG:-none}" >/dev/null 2>&1 || true'
+            sh 'command -v docker >/dev/null && docker logout "$REGISTRY" || true'
+            sh 'command -v docker >/dev/null && docker rmi "$REGISTRY/$IMAGE:${IMAGE_TAG:-none}" || true'
+            script {
+                try {
+                    mail(
+                        to: 'dmipro@lurax.ru',
+                        subject: "[Jenkins] ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: """Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}
+Result: ${currentBuild.currentResult}
+Branch: ${env.BRANCH_NAME}
+Image: ${REGISTRY}/${IMAGE}:${env.IMAGE_TAG ?: 'n/a'}
+Duration: ${currentBuild.durationString.replace(' and counting', '')}
+
+${env.BUILD_URL}""",
+                    )
+                } catch (err) {
+                    echo "Mail notification failed: ${err}"
+                }
+            }
+        }
+    }
+}

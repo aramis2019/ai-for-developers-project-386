@@ -1,10 +1,3 @@
-### Статус проверок
-
-[![Hexlet check](https://github.com/aramis2019/ai-for-developers-project-386/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/aramis2019/ai-for-developers-project-386/actions/workflows/hexlet-check.yml)
-[![Contract](https://github.com/aramis2019/ai-for-developers-project-386/actions/workflows/contract.yml/badge.svg)](https://github.com/aramis2019/ai-for-developers-project-386/actions/workflows/contract.yml)
-[![Backend](https://github.com/aramis2019/ai-for-developers-project-386/actions/workflows/backend.yml/badge.svg)](https://github.com/aramis2019/ai-for-developers-project-386/actions/workflows/backend.yml)
-[![Frontend](https://github.com/aramis2019/ai-for-developers-project-386/actions/workflows/frontend.yml/badge.svg)](https://github.com/aramis2019/ai-for-developers-project-386/actions/workflows/frontend.yml)
-
 # Meetly — сервис записи на встречи
 
 Meetly позволяет гостю выбрать тип встречи, найти свободный слот и записаться
@@ -264,18 +257,27 @@ npm run lint -w @meetly/frontend
 
 ## CI
 
-GitHub Actions запускаются по изменённым путям:
+Основной CI — Jenkins: multibranch job
+[`hexlet/Hexlet.Meetly`](https://jenkins.lurax.ru/job/hexlet/job/Hexlet.Meetly/),
+pipeline лежит в `infrastructure/jenkins/meetly-quick-linux.jenkinsfile`.
+Стадии на каждый push (webhook из Gitea):
 
-| Workflow | Проверки |
+| Стадия | Проверки |
 | --- | --- |
-| `contract.yml` | TypeSpec/Redocly, свежесть OpenAPI и TS-типов, oasdiff |
-| `backend.yml` | Release build, unit/integration/contract tests, свежесть C# DTO, Schemathesis |
-| `frontend.yml` | TypeScript typecheck и production build |
-| `release-please.yml` | release PR, CHANGELOG, версия, тег и GitHub Release |
+| Contract gates | TypeSpec/Redocly lint, свежесть openapi.yaml и schema.d.ts |
+| C# DTO freshness | nswag-перегенерация + `git diff` по `Generated/` |
+| Typecheck | `tsc --noEmit` фронтенда |
+| Backend tests | Release build + 58 unit/integration/contract тестов |
+| Docker image | multi-stage сборка `linnetlab/meetly` |
+| Smoke + Schemathesis | старт контейнера, curl, фаззинг всех операций против спеки |
+| Contract classification | oasdiff-репорт изменений контракта с прошлого релиза |
+| Push to Nexus | только `main`: образ `:BUILD-sha` и `:latest` в docker.lurax.ru |
 
-Schemathesis поднимает API в `Production/InMemory` с `--no-launch-profile` и
-проверяет все 7 операций. `continue-on-error` не используется: дрейф реализации
-от OpenAPI блокирует CI.
+Schemathesis проверяет **собранный образ** (InMemory-хранилище) и блокирует
+пайплайн при дрейфе реализации от OpenAPI.
+
+В Gitea Actions остался только `release.yml` — Gitea Release из CHANGELOG.md
+при пуше тега `vX.Y.Z`. Дублирующие CI-workflows удалены в пользу Jenkins.
 
 ## Изменение контракта
 
@@ -307,9 +309,10 @@ docs(contracts): уточнить пользовательские сценар�
 ci: усилить проверки Schemathesis
 ```
 
-`release-please` анализирует коммиты после каждого merge в `main` и создаёт
-или обновляет release PR с `CHANGELOG.md` и новой версией корневого
-`package.json`. Merge release PR создаёт тег `vX.Y.Z` и GitHub Release.
+Релиз готовит `commit-and-tag-version`: `npm run release` парсит коммиты
+с прошлого тега, бампит версию корневого `package.json`, обновляет
+`CHANGELOG.md` и создаёт тег `vX.Y.Z`. После `git push --follow-tags`
+workflow `release.yml` публикует Gitea Release.
 
 Подробные правила: [AGENTS.md](AGENTS.md#conventional-commits).
 

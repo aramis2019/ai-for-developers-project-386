@@ -17,11 +17,11 @@ namespace Meetly.ContractTests;
 /// Формы тел ответов этим тестом НЕ проверяются — для этого в CI отдельно
 /// прогоняется Schemathesis против запущенного приложения.
 /// </summary>
-public sealed class RouteCoverageTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class RouteCoverageTests : IClassFixture<InMemoryWebApplicationFactory>
 {
     private readonly WebApplicationFactory<Program> factory;
 
-    public RouteCoverageTests(WebApplicationFactory<Program> factory) => this.factory = factory;
+    public RouteCoverageTests(InMemoryWebApplicationFactory factory) => this.factory = factory;
 
     [Fact]
     public void EveryContractOperationIsRouted()
